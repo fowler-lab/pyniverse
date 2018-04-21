@@ -236,3 +236,11 @@ class Classifications():
 
         tqdm.pandas(desc='extracting durations ')
         self.classifications['task_duration']=self.classifications.progress_apply(self._task_duration,axis=1)
+
+    def save_pickle(self,filename):
+
+        self.classifications.to_pickle(filename)
+
+    def save_csv(self,filename):
+
+        self.classifications.to_csv(filename)

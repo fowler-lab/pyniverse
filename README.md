@@ -1,1 +1,1 @@
-# bashthebug: a Python class to analyse the results of the Zooniverse volunteers
+# pyniverse: a Python class to analyse generic results of the Zooniverse volunteers

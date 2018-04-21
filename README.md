@@ -34,4 +34,4 @@ This step should take no more than 30 seconds and in addition to the above infor
   
 ![a graph](examples/example-graphs/test-users-day.png)
 
-  
+[another graph](https://github.com/philipwfowler/pyniverse/blob/master/examples/example-graphs/test-classifications-week.pdf)

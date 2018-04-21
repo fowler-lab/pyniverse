@@ -32,6 +32,7 @@ This step should take no more than 30 seconds and in addition to the above infor
     test-classifications-day.pdf      test-classifications-week.pdf     test-user-distribution-log.pdf    test-users-month.pdf
     test-classifications-month.pdf    test-user-distribution-linear.pdf test-users-day.pdf                test-users-week.pdf
   
-![a graph](examples/example-graphs/test-users-day.pdf)
+![a graph](examples/example-graphs/test-users-day.png)
 
-  
+![another graph](https://github.com/philipwfowler/pyniverse/blob/master/examples/example-graphs/test-classifications-week.pdf)
+![another graph](https://github.com/philipwfowler/pyniverse/blob/master/examples/example-graphs/test-classifications-week.png)

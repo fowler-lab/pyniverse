@@ -31,8 +31,15 @@ This step should take no more than 30 seconds and in addition to the above infor
     $ ls pdf/
     test-classifications-day.pdf      test-classifications-week.pdf     test-user-distribution-log.pdf    test-users-month.pdf
     test-classifications-month.pdf    test-user-distribution-linear.pdf test-users-day.pdf                test-users-week.pdf
-  
-![a graph](examples/example-graphs/test-users-day.png)
 
-![another graph](https://github.com/philipwfowler/pyniverse/blob/master/examples/example-graphs/test-classifications-week.pdf)
-![another graph](https://github.com/philipwfowler/pyniverse/blob/master/examples/example-graphs/test-classifications-week.png)
+There are three main graphs produced. The first is simply the number of classifications against time. Three time periods are produced: by day, by week and by month and a cumulative line is added. 
+
+![Number of classifications per week](https://github.com/philipwfowler/pyniverse/blob/master/examples/example-graphs/test-classifications-week.png)
+
+The next is the number of users trying the project for the first time, again by day, by week and by month.
+
+![Number of new users per day](https://github.com/philipwfowler/pyniverse/blob/master/examples/example-graphs/test-users-day.png)
+
+And lastly the cumulative user distribution so you can see how asymmetric the contribution of the users is.
+
+![User Distribution](https://github.com/philipwfowler/pyniverse/blob/master/examples/example-graphs/test-user-distribution-linear.png)

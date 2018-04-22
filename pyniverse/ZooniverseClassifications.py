@@ -2,10 +2,10 @@
 
 import dateutil.parser
 import datetime
-import pandas
-import ujson
-import numpy
 import os
+
+import ujson
+import pandas
 import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates

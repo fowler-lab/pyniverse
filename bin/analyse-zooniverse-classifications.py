@@ -15,7 +15,6 @@ if __name__ == "__main__":
     parser.add_argument("--timings",action='store_true',default=False,help="print the time taken for each step")
     options = parser.parse_args()
 
-
     print("Reading classifications from CSV file...")
     start=time.time()
     current_classifications=pyniverse.Classifications(zooniverse_file=options.input_file)

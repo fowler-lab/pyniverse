@@ -2,7 +2,7 @@
 
 This Python package is intended to allow Zooniverse Project Owners to quickly run some simple analysis on the classification CSVs that the Zooniverse backend allows you to export via the Data Exports page. 
 
-## How to install
+## How to install
 
 Download/clone the GitHub repo, then to install in your $HOME directory
 

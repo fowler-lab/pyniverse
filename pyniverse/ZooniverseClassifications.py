@@ -14,15 +14,28 @@ from tqdm import tqdm
 
 class Classifications():
 
-    def __init__(self,zooniverse_file=None,pickle_file=None):
+    def __init__(self,zooniverse_file=None,pickle_file=None,from_date=None,to_date=None):
 
         if zooniverse_file:
 
             # read in the raw classifications, parsing the JSON as you go
-            self.classifications = pandas.read_csv(zooniverse_file,parse_dates=['created_at'],infer_datetime_format=True,converters={'subject_data':self._parse_json,'metadata':self._parse_json,'annotations':self._parse_json},index_col='classification_id')
+            classifications = pandas.read_csv(zooniverse_file,parse_dates=['created_at'],infer_datetime_format=True,converters={'subject_data':self._parse_json,'metadata':self._parse_json,'annotations':self._parse_json},index_col='classification_id')
 
             # drop a few of the (unused) columns
-            self.classifications.drop(['gold_standard','expert'], axis=1, inplace=True)
+            classifications.drop(['gold_standard','expert'], axis=1, inplace=True)
+
+            # create a dataseries of just the date/times
+            if from_date:
+                a=classifications.loc[classifications.created_at>dateutil.parser.parse(from_date).date()]
+            else:
+                a=classifications
+
+            if to_date:
+                b=a.loc[a.created_at<dateutil.parser.parse(to_date).date()]
+            else:
+                b=a
+
+            self.classifications=b
 
             # then create a Boolean column defining if the classification was made during live or not
             self.classifications['live_project']  = [self._get_live_project(q) for q in self.classifications.metadata]
@@ -101,35 +114,35 @@ class Classifications():
             # apparently some subject metadata doesn't have this? dunno?
             return False
 
-    def plot_classifications_by_time(self,sampling=None,colour='#dc2d4c',filename=None,pre_launch=True,add_cumulative=False):
+    def plot_classifications_by_time(self,sampling=None,colour='#dc2d4c',filename=None,from_date=None,to_date=None,add_cumulative=False):
 
-        # create a dataseries of just the date/times
-        if not pre_launch:
-            a=self.classifications.loc[self.classifications.created_at>datetime.date(2017,4,7)]
-            tmp=a[['created_at']]
-        else:
-            tmp=self.classifications[['created_at']]
+        tmp=self.classifications[['created_at']]
 
         # set it as the index and then re-sample
         tmp.set_index(tmp.created_at,inplace=True)
 
-        self._plot_time_bar(tmp,sampling,colour,filename,pre_launch,add_cumulative,yaxis="Classifications")
+        self._plot_time_bar(tmp,sampling,colour,filename,add_cumulative,yaxis="Classifications")
 
 
-    def plot_users_by_time(self,sampling='week',colour='#9ab51e',filename=None,pre_launch=True,add_cumulative=False):
+    def plot_users_by_time(self,sampling='week',colour='#9ab51e',filename=None,from_date=None,to_date=None,add_cumulative=False):
 
         # create a dataseries of just the date/times
-        if not pre_launch:
-            a=self.classifications.loc[self.classifications.created_at>datetime.date(2017,4,7)]
-            tmp=a[['user_name','created_at']]
-        else:
-            tmp=self.classifications[['user_name','created_at']]
+        if from_date:
+            a=self.classifications.loc[self.classifications.created_at>dateutil.parser.parse(from_date).date()]
 
-        foo=tmp[['user_name','created_at']].groupby('user_name').min()
+        else:
+            a=self.classifications[['user_name','created_at']]
+
+        if to_date:
+            b=a.loc[a.created_at<dateutil.parser.parse(to_date).date()]
+        else:
+            b=a
+
+        foo=b[['user_name','created_at']].groupby('user_name').min()
         foo.set_index(foo.created_at,inplace=True)
         tmp=foo.created_at
 
-        self._plot_time_bar(foo,sampling,colour,filename,pre_launch,add_cumulative,yaxis="Users")
+        self._plot_time_bar(foo,sampling,colour,filename,add_cumulative,yaxis="Users")
 
     def plot_user_classification_distribution(self,colour="#9ab51e",filename=None):
 
@@ -152,7 +165,7 @@ class Classifications():
         axes1.plot(self.users.proportion_user_base,self.users.proportion_total_classifications,color=colour)
         fig.savefig(stem+"-log"+file_extension,transparent=True)
 
-    def _plot_time_bar(self,data,sampling='week',colour='#e41a1c',filename=None,pre_launch=True,add_cumulative=False,yaxis=None):
+    def _plot_time_bar(self,data,sampling='week',colour='#e41a1c',filename=None,add_cumulative=False,yaxis=None):
 
         assert sampling in ['week','month','day'], "sampling must be either week, month or day"
 
@@ -185,6 +198,7 @@ class Classifications():
         axes1.xaxis.set_major_formatter(mdates.DateFormatter('%b %y'))
         axes1.tick_params('y', colors=colour)
         axes1.bar(resampled_data.index,resampled_data.number,width=bar_width,align='center',lw=0,fc=colour,zorder=10)
+        axes1.set_ylim(ymin=0)
 
         if add_cumulative:
             axes2 = axes1.twinx()
@@ -193,6 +207,7 @@ class Classifications():
             axes2.xaxis.set_major_locator(mdates.MonthLocator())
             axes2.xaxis.set_major_formatter(mdates.DateFormatter('%b %y'))
             axes2.plot(resampled_data.index,resampled_data.total,zorder=20,color='black')
+            axes2.set_ylim(ymin=0)
 
         fig.savefig(filename,transparent=True)
 

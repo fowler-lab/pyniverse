@@ -9,7 +9,7 @@ setup(
         "matplotlib >= 2.1.1"
     ],
     name='pyniverse',
-    version='0.1.0',
+    version='1.0.0',
     url='https://github.com/philipwfowler/pyniverse',
     author='Philip W Fowler',
     packages=['pyniverse'],

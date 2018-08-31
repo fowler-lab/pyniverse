@@ -43,3 +43,9 @@ The next is the number of users trying the project for the first time, again by 
 And lastly the cumulative user distribution so you can see how asymmetric the contribution of the users is.
 
 ![User Distribution](https://github.com/philipwfowler/pyniverse/blob/master/examples/example-graphs/test-user-distribution-linear.png)
+
+## How to cite
+
+If you use this package, please cite it using the DOI below
+
+[![DOI](https://zenodo.org/badge/130476331.svg)](https://zenodo.org/badge/latestdoi/130476331)

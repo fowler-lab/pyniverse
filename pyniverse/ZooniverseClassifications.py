@@ -14,7 +14,20 @@ from tqdm import tqdm
 
 class Classifications():
 
+    """ Classifications class for Zooniverse Data Exports CSV file.
+
+    Args:
+        zooniverse_file (str): the path to the zooniverse data exports file. Can be a simple foo.csv file or a compressed file
+        as Python can parse most common compression formats (e.g. foo.csv.bz2, foo.csv.gz)
+        pickle_file (str): alternatively, one can provide the path to a pickle (foo.pkl) file that was saved earlier using the save_pickle() method.
+        from_date (str): only consider classifications after this date. Although a string, is parsed so ISO format recommended e.g. 2018-02-20
+        to_date (str): only consider classifications up to this date. Although a string, is parsed so ISO format recommended e.g. 2018-02-26
+    """
+
     def __init__(self,zooniverse_file=None,pickle_file=None,from_date=None,to_date=None):
+
+        # check that one of zooniverse_file or pickle_file is specified
+        assert zooniverse_file or pickle_file, "one of zooniverse_file or pickle_file must be specified"
 
         if zooniverse_file:
 
@@ -55,6 +68,12 @@ class Classifications():
             self.classifications=pandas.read_pickle(stem+"-classifications"+file_extension)
 
     def create_users_table(self):
+        """ Create a users table, stored internally as a Pandas dataframe.
+
+        Notes
+         * also calculates the Gini coefficient which is a measure of the inequality between the users who have done the most and least classifications.
+         * since it calculates the total_users, this method must be called before any print statements
+        """
 
         # create a table of users and how many classifications they have done
         self.users=self.classifications[['user_name','created_at']].groupby('user_name').count()
@@ -89,6 +108,8 @@ class Classifications():
 
 
     def __repr__(self):
+        ''' Print a summary of the Zooniverse classifications stored.
+        '''
 
         line="%30s %7i\n" % ("Total classifications:",self.total_classifications)
         line+="%30s %7i\n" % ("Total users:",self.total_users)

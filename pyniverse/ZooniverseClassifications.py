@@ -256,6 +256,9 @@ class Classifications():
 
         self.classifications.to_pickle(filename)
 
-    def save_csv(self,filename):
+    def save_csv(self,filename,compression=False):
 
-        self.classifications.to_csv(filename)
+        if compression:
+            self.classifications.to_csv(filename,compression='bz2')
+        else:
+            self.classifications.to_csv(filename)

@@ -1,3 +1,5 @@
+[![DOI](https://zenodo.org/badge/130476331.svg)](https://zenodo.org/badge/latestdoi/130476331)
+
 # pyniverse: a Python package to analyse generic results of the Zooniverse volunteers
 
 This Python package is intended to allow Zooniverse Project Owners to quickly run some simple analysis on the classification CSVs that the Zooniverse backend allows you to export via the Data Exports page. 

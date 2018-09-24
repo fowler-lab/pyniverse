@@ -5,7 +5,7 @@ import datetime
 import os
 
 import ujson
-import pandas
+import pandas, numpy
 import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
@@ -202,6 +202,8 @@ class Classifications():
             resampled_data=data.resample('D').count()
             bar_width=1.01
 
+        number_of_months = int((data.index.max()-data.index.min())/numpy.timedelta64(1, 'M'))
+
         resampled_data.columns=['number']
 
         resampled_data['total']=resampled_data.cumsum()
@@ -215,19 +217,19 @@ class Classifications():
         # axes1.spines['right'].set_visible(False)
 
         axes1.set_ylabel(yaxis+" per "+sampling,color=colour)
-        axes1.xaxis.set_major_locator(mdates.MonthLocator())
-        axes1.xaxis.set_major_formatter(mdates.DateFormatter('%b %y'))
         axes1.tick_params('y', colors=colour)
         axes1.bar(resampled_data.index,resampled_data.number,width=bar_width,align='center',lw=0,fc=colour,zorder=10)
+        axes1.xaxis.set_major_formatter(mdates.DateFormatter('%b %y'))
+        axes1.xaxis.set_major_locator(mdates.MonthLocator(interval=int(number_of_months/12)+1))
         axes1.set_ylim(ymin=0)
 
         if add_cumulative:
             axes2 = axes1.twinx()
             axes2.yaxis.set_major_formatter(matplotlib.ticker.StrMethodFormatter('{x:,.0f}'))
             axes2.tick_params('y', colors='black')
-            axes2.xaxis.set_major_locator(mdates.MonthLocator())
-            axes2.xaxis.set_major_formatter(mdates.DateFormatter('%b %y'))
             axes2.plot(resampled_data.index,resampled_data.total,zorder=20,color='black')
+            axes2.xaxis.set_major_locator(mdates.MonthLocator(interval=int(number_of_months/12)+1))
+            axes2.xaxis.set_major_formatter(mdates.DateFormatter('%b %y'))
             axes2.set_ylim(ymin=0)
 
         fig.savefig(filename,transparent=True)

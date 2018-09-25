@@ -65,7 +65,8 @@ class Classifications():
             stem, file_extension = os.path.splitext(pickle_file)
 
             # doing it this way means you can provide either pickle file and it will still work
-            self.classifications=pandas.read_pickle(stem+"-classifications"+file_extension)
+            # self.classifications=pandas.read_pickle(stem+"-classifications"+file_extension)
+            self.classifications=pandas.read_pickle(pickle_file)
 
     def create_users_table(self):
         """ Create a users table, stored internally as a Pandas dataframe.

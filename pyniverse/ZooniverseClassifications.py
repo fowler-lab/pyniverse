@@ -222,7 +222,7 @@ class Classifications():
         axes1.bar(resampled_data.index,resampled_data.number,width=bar_width,align='center',lw=0,fc=colour,zorder=10)
         axes1.xaxis.set_major_formatter(mdates.DateFormatter('%b %y'))
         axes1.xaxis.set_major_locator(mdates.MonthLocator(interval=int(number_of_months/12)+1))
-        axes1.set_ylim(ymin=0)
+        axes1.set_ylim(bottom=0)
 
         if add_cumulative:
             axes2 = axes1.twinx()
@@ -231,7 +231,7 @@ class Classifications():
             axes2.plot(resampled_data.index,resampled_data.total,zorder=20,color='black')
             axes2.xaxis.set_major_locator(mdates.MonthLocator(interval=int(number_of_months/12)+1))
             axes2.xaxis.set_major_formatter(mdates.DateFormatter('%b %y'))
-            axes2.set_ylim(ymin=0)
+            axes2.set_ylim(bottom=0)
 
         fig.savefig(filename,transparent=True)
 

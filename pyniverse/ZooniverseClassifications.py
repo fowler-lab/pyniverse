@@ -56,18 +56,23 @@ class Classifications():
             # create a new dataset containing only live classifications
             self.classifications=self.classifications.loc[self.classifications["live_project"]==True]
 
+            # how many classifications have been done?
+            self.total_classifications=len(self.classifications)
 
         elif pickle_file:
 
             # find out the file extension so we can load in the dataset using the right method
             stem, file_extension = os.path.splitext(pickle_file)
 
+
             # doing it this way means you can provide either pickle file and it will still work
             # self.classifications=pandas.read_pickle(stem+"-classifications"+file_extension)
             self.classifications=pandas.read_pickle(pickle_file)
 
-        # how many classifications have been done?
-        self.total_classifications=len(self.classifications)
+            # how many classifications have been done?
+            self.total_classifications=len(self.classifications)
+
+
 
     def create_users_table(self):
         """ Create a users table, stored internally as a Pandas dataframe.
@@ -252,7 +257,7 @@ class Classifications():
             return ""
 
     def _parse_viewport_width(self,row):
-        return row.metadata['viewport']['height']
+        return row.metadata['viewport']['width']
 
     def _parse_viewport_height(self,row):
         return row.metadata['viewport']['height']

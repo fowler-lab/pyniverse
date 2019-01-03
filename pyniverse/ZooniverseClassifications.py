@@ -271,11 +271,11 @@ class Classifications():
     def create_misc_fields(self):
 
         tqdm.pandas(desc='extracting language  ')
-        self.classifications['user_language']=self.classifications.apply(self._user_language,axis=1)
+        self.classifications['user_language']=self.classifications.progress_apply(self._user_language,axis=1)
 
         tqdm.pandas(desc='extracting viewport  ')
-        self.classifications['viewport_width']=self.classifications.apply(self._parse_viewport_width,axis=1)
-        self.classifications['viewport_height']=self.classifications.apply(self._parse_viewport_height,axis=1)
+        self.classifications['viewport_width']=self.classifications.progress_apply(self._parse_viewport_width,axis=1)
+        self.classifications['viewport_height']=self.classifications.progress_apply(self._parse_viewport_height,axis=1)
 
     def calculate_task_durations(self):
 

@@ -64,9 +64,15 @@ class Classifications():
             # find out the file extension so we can load in the dataset using the right method
             stem, file_extension = os.path.splitext(pickle_file)
 
+
             # doing it this way means you can provide either pickle file and it will still work
             # self.classifications=pandas.read_pickle(stem+"-classifications"+file_extension)
             self.classifications=pandas.read_pickle(pickle_file)
+
+            # how many classifications have been done?
+            self.total_classifications=len(self.classifications)
+
+
 
     def create_users_table(self):
         """ Create a users table, stored internally as a Pandas dataframe.
@@ -251,7 +257,7 @@ class Classifications():
             return ""
 
     def _parse_viewport_width(self,row):
-        return row.metadata['viewport']['height']
+        return row.metadata['viewport']['width']
 
     def _parse_viewport_height(self,row):
         return row.metadata['viewport']['height']
@@ -265,11 +271,11 @@ class Classifications():
     def create_misc_fields(self):
 
         tqdm.pandas(desc='extracting language  ')
-        self.classifications['user_language']=self.classifications.apply(self._user_language,axis=1)
+        self.classifications['user_language']=self.classifications.progress_apply(self._user_language,axis=1)
 
         tqdm.pandas(desc='extracting viewport  ')
-        self.classifications['viewport_width']=self.classifications.apply(self._parse_viewport_width,axis=1)
-        self.classifications['viewport_height']=self.classifications.apply(self._parse_viewport_height,axis=1)
+        self.classifications['viewport_width']=self.classifications.progress_apply(self._parse_viewport_width,axis=1)
+        self.classifications['viewport_height']=self.classifications.progress_apply(self._parse_viewport_height,axis=1)
 
     def calculate_task_durations(self):
 

@@ -24,7 +24,7 @@ class Classifications():
         to_date (str): only consider classifications up to this date. Although a string, is parsed so ISO format recommended e.g. 2018-02-26
     """
 
-    def __init__(self,zooniverse_file=None,pickle_file=None,from_date=None,to_date=None):
+    def __init__(self,zooniverse_file=None,pickle_file=None,from_date=None,to_date=None,live_rows=True):
 
         # check that one of zooniverse_file or pickle_file is specified
         assert zooniverse_file or pickle_file, "one of zooniverse_file or pickle_file must be specified"
@@ -53,8 +53,9 @@ class Classifications():
             # then create a Boolean column defining if the classification was made during live or not
             self.classifications['live_project']  = [self._get_live_project(q) for q in self.classifications.metadata]
 
-            # create a new dataset containing only live classifications
-            self.classifications=self.classifications.loc[self.classifications["live_project"]==True]
+            # if asked, create a new dataset containing only live classifications
+            if live_rows:
+                self.classifications=self.classifications.loc[self.classifications["live_project"]==True]
 
             # how many classifications have been done?
             self.total_classifications=len(self.classifications)

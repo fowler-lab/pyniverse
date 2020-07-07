@@ -33,10 +33,10 @@ if __name__ == "__main__":
     # Plotting graphs...
     for sampling_time in ['month','week','day']:
 
-        current_classifications.plot_classifications_by_time(sampling=sampling_time,filename='graphs/'+options.output_stem+'-classifications-'+sampling_time+'.png',add_cumulative=True)
-        current_classifications.plot_users_by_time(sampling=sampling_time,filename='graphs/'+options.output_stem+'-users-'+sampling_time+'.png',add_cumulative=True)
+        current_classifications.plot_classifications_by_time(sampling=sampling_time,filename='graphs/'+options.output_stem+'-classifications-'+sampling_time+'.pdf',add_cumulative=True)
+        current_classifications.plot_users_by_time(sampling=sampling_time,filename='graphs/'+options.output_stem+'-users-'+sampling_time+'.pdf',add_cumulative=True)
 
-        current_classifications.plot_user_classification_distribution(filename="graphs/"+options.output_stem+'-user-distribution.png')
+        current_classifications.plot_user_classification_distribution(filename="graphs/"+options.output_stem+'-user-distribution.pdf')
 
     print(current_classifications)
 

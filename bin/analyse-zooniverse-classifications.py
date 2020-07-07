@@ -15,11 +15,15 @@ if __name__ == "__main__":
     parser.add_argument("--from_date",default=False,help="if required, a date after which any graph will be plotted. ISO format e.g. 2017-04-07")
     parser.add_argument("--to_date",default=False,help="if required, a date before which any graph will be plotted. ISO format e.g. 2017-04-07 ")
     parser.add_argument("--timings",action='store_true',default=False,help="print the time taken for each step")
+    parser.add_argument("--private_project",action='store_true',default=False,help="whether the project is private and therefore do not filter out non-live classifications")
     options = parser.parse_args()
 
     print("Reading classifications from CSV file...")
     start=time.time()
-    current_classifications=pyniverse.Classifications(zooniverse_file=options.input_file,from_date=options.from_date,to_date=options.to_date)
+    if options.private_project:
+        current_classifications=pyniverse.Classifications(zooniverse_file=options.input_file,from_date=options.from_date,to_date=options.to_date,live_rows=not(options.private_project))
+    else:
+        current_classifications=pyniverse.Classifications(zooniverse_file=options.input_file,from_date=options.from_date,to_date=options.to_date)
     if options.timings:
         print("%.1f seconds" % (time.time()-start))
 

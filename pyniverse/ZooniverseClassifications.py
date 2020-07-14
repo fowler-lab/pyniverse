@@ -12,7 +12,7 @@ import matplotlib.dates as mdates
 
 from tqdm import tqdm
 
-class Classifications():
+class Classifications(object):
 
     """ Classifications class for Zooniverse Data Exports CSV file.
 
@@ -24,27 +24,28 @@ class Classifications():
         to_date (str): only consider classifications up to this date. Although a string, is parsed so ISO format recommended e.g. 2018-02-26
     """
 
-    def __init__(self,zooniverse_file=None,pickle_file=None,from_date=None,to_date=None,live_rows=True):
+    # def __init__(self,zooniverse_file=None,pickle_file=None,from_date=None,to_date=None,live_rows=True):
+    def __init__(self,*args,**kwargs):
 
         # check that one of zooniverse_file or pickle_file is specified
-        assert zooniverse_file or pickle_file, "one of zooniverse_file or pickle_file must be specified"
+        assert 'zooniverse_file' or 'pickle_file' in kwargs.keys(), "one of zooniverse_file or pickle_file must be specified"
 
-        if zooniverse_file:
+        if 'zooniverse_file' in kwargs.keys():
 
             # read in the raw classifications, parsing the JSON as you go
-            classifications = pandas.read_csv(zooniverse_file,parse_dates=['created_at'],infer_datetime_format=True,converters={'subject_data':self._parse_json,'metadata':self._parse_json,'annotations':self._parse_json},index_col='classification_id')
+            classifications = pandas.read_csv(kwargs['zooniverse_file'],parse_dates=['created_at'],infer_datetime_format=True,converters={'subject_data':self._parse_json,'metadata':self._parse_json,'annotations':self._parse_json},index_col='classification_id')
 
             # drop a few of the (unused) columns
             classifications.drop(['gold_standard','expert'], axis=1, inplace=True)
 
             # create a dataseries of just the date/times
-            if from_date:
-                a=classifications.loc[classifications.created_at>dateutil.parser.parse(from_date).date()]
+            if 'from_date' in kwargs.keys() and kwargs['from_date'] is not False:
+                a=classifications.loc[classifications.created_at>dateutil.parser.parse(kwargs['from_date']).date()]
             else:
                 a=classifications
 
-            if to_date:
-                b=a.loc[a.created_at<dateutil.parser.parse(to_date).date()]
+            if 'to_date' in kwargs.keys() and kwargs['to_date'] is not False:
+                b=a.loc[a.created_at<dateutil.parser.parse(kwargs['to_date']).date()]
             else:
                 b=a
 
@@ -54,25 +55,23 @@ class Classifications():
             self.classifications['live_project']  = [self._get_live_project(q) for q in self.classifications.metadata]
 
             # if asked, create a new dataset containing only live classifications
-            if live_rows:
+            if 'live_rows' not in kwargs.keys() or kwargs['live_rows']:
                 self.classifications=self.classifications.loc[self.classifications["live_project"]==True]
 
             # how many classifications have been done?
             self.total_classifications=len(self.classifications)
 
-        elif pickle_file:
+        elif 'pickle_file' in kwargs.keys():
 
             # find out the file extension so we can load in the dataset using the right method
-            stem, file_extension = os.path.splitext(pickle_file)
-
+            stem, file_extension = os.path.splitext(kwargs['pickle_file'])
 
             # doing it this way means you can provide either pickle file and it will still work
             # self.classifications=pandas.read_pickle(stem+"-classifications"+file_extension)
-            self.classifications=pandas.read_pickle(pickle_file)
+            self.classifications=pandas.read_pickle(kwargs['pickle_file'])
 
             # how many classifications have been done?
             self.total_classifications=len(self.classifications)
-
 
 
     def create_users_table(self):

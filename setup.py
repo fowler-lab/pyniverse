@@ -14,6 +14,6 @@ setup(
     author='Philip W Fowler',
     packages=['pyniverse'],
     license='MIT',
-    scripts=['bin/analyse-zooniverse-classifications.py'],
+    scripts=['bin/zooniverse-classifications-analyse.py'],
     long_description=open('README.md').read(),
 )

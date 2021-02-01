@@ -91,8 +91,8 @@ class Classifications(object):
         # how many users have contributed?
         self.total_users=len(self.users)
 
-        # sort the table so the top users are first
-        self.users.sort_values(['classifications'],ascending=False,inplace=True)
+        # sort the table so the top users are last
+        self.users.sort_values(['classifications'],ascending=True,inplace=True)
 
         # label each user as whether it is anonymous or not
         self.users['anonymous']=self.users.apply(self._anonymous_user,axis=1)
@@ -110,6 +110,7 @@ class Classifications(object):
         self.users['proportion_user_base']=self.users['rank']/self.total_users
 
         # now calculate the Gini coefficient
+
         area_under_curve=(self.users['proportion_total_classifications'].sum())/self.total_users
         self.gini_coefficient=1-(2*area_under_curve)
 
@@ -122,12 +123,20 @@ class Classifications(object):
         line+="%30s %7i\n" % ("Total users:",self.total_users)
         line+="%30s %7.2f\n" % ("Gini coefficient:",self.gini_coefficient)
         line+="\n"
+
+        # sort the table so the top users are first
+        self.users.sort_values(['classifications'],ascending=False,inplace=True)
+
         top_10=(100*self.users.classifications[:10].sum())/self.total_classifications
         line+="%30s %7.1f %%\n" % ("Top   10 users have done:",top_10)
         top_100=(100*self.users.classifications[:100].sum())/self.total_classifications
         line+="%30s %7.1f %%\n" % ("Top  100 users have done:",top_100)
         top_1000=(100*self.users.classifications[:1000].sum())/self.total_classifications
         line+="%30s %7.1f %%\n" % ("Top 1000 users have done:",top_1000)
+
+        # sort the table so the top users are last
+        self.users.sort_values(['classifications'],ascending=False,inplace=True)
+
 
         return(line)
 
@@ -180,18 +189,13 @@ class Classifications(object):
         fig = plt.figure(figsize=(5, 5))
         axes1 = plt.gca()
 
-        axes1.plot(self.users.proportion_user_base,self.users.proportion_total_classifications,color=colour)
-        axes1.plot([0,1],[0,1],color=colour,linestyle='dashed')
+        axes1.plot(self.users.proportion_user_base,self.users.proportion_total_classifications,color=colour,linewidth=2)
+        axes1.plot([0,1],[0,1],color=colour,linestyle='dashed',linewidth=2)
         axes1.text(0.15,0.65,"Gini-coefficient = %.2f" % self.gini_coefficient,color=colour)
-        fig.savefig(stem+"-linear"+file_extension,transparent=True)
+        axes1.set_xlabel('cumulative contributors')
+        axes1.set_ylabel('cumulative classifications')
+        fig.savefig(stem+file_extension,transparent=True)
 
-        fig = plt.figure(figsize=(5, 5))
-        axes1 = plt.gca()
-
-        axes1.set_xscale("log")
-        axes1.text(0.0005,0.65,"Gini-coefficient = %.2f" % self.gini_coefficient,color=colour)
-        axes1.plot(self.users.proportion_user_base,self.users.proportion_total_classifications,color=colour)
-        fig.savefig(stem+"-log"+file_extension,transparent=True)
 
     def _plot_time_bar(self,data,sampling='week',colour='#e41a1c',filename=None,add_cumulative=False,yaxis=None):
 

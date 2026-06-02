@@ -102,5 +102,6 @@ ENV/
 
 # mypy
 .mypy_cache/
+tests/.mplconfig/
 
 *~

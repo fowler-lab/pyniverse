@@ -1,0 +1,67 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pyniverse"
+version = "1.0.0"
+description = "Analyse generic Zooniverse classification exports."
+readme = "README.md"
+license = { text = "MIT" }
+authors = [{ name = "Philip W Fowler" }]
+requires-python = ">=3.10"
+dependencies = [
+    "matplotlib>=3.8",
+    "numpy>=1.26",
+    "pandas>=2.2",
+    "python-dateutil>=2.9",
+    "tqdm>=4.66",
+    "ujson>=5.10",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+]
+
+[project.urls]
+Homepage = "https://github.com/philipwfowler/pyniverse"
+
+[project.optional-dependencies]
+dev = [
+    "black>=24.4",
+    "pytest>=8.2",
+    "ruff>=0.4.0",
+]
+
+[project.scripts]
+zooniverse-classifications-analyse = "pyniverse.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["pyniverse"]
+
+[tool.black]
+line-length = 88
+target-version = ["py310", "py311", "py312"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py310"
+
+[tool.ruff.lint]
+select = [
+    "E",
+    "F",
+    "I",
+    "B",
+    "UP",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

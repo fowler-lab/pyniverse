@@ -1,3 +1,3 @@
-#! /usr/bin/env python
-
 from .ZooniverseClassifications import Classifications
+
+__all__ = ["Classifications"]

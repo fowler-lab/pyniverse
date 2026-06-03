@@ -6,19 +6,21 @@ This Python package is intended to allow Zooniverse Project Owners to quickly ru
 
 ## How to install
 
-Download/clone the GitHub repo, then to install in your $HOME directory
+Download or clone the GitHub repo, then install it with `pip`.
 
     $ cd pyniverse/
-    $ ls
-    LICENSE            README.md          bin                examples           pyniverse          setup.py
-    $ python setup.py install --user
+    $ python -m pip install .
+
+For development work, install the linting, formatting, and test tools too:
+
+    $ python -m pip install -e ".[dev]"
   
 ## How to use
 
-Most of the logic in Pyniverse is hidden away in a simple class, called `Classifications`, which contains a variety of methods, including several that plot graphs. Then there is a simple script in the `bin/` folder called `analyse-zooniverse-classifications.py` that creates an instance of the class by passing it the path of the CSV file downloaded from the Zooniverse file and calling several of the methods. Let's see how it works.
+Most of the logic in Pyniverse is hidden away in a simple class, called `Classifications`, which contains a variety of methods, including several that plot graphs. The installed CLI command creates an instance of the class by passing it the path of the CSV file downloaded from Zooniverse and calling several of the methods. Let's see how it works.
 
     $ cd examples/
-    $ analyse-zooniverse-classifications.py --input_file dat/test-zooniverse-classifications.csv.bz2
+    $ zooniverse-classifications-analyse --input_file dat/test-zooniverse-classifications.csv.bz2
     Reading classifications from CSV file...
         Total classifications:  218629
                   Total users:    4529
@@ -28,11 +30,11 @@ Most of the logic in Pyniverse is hidden away in a simple class, called `Classif
      Top  100 users have done:    44.4 %
      Top 1000 users have done:    82.8 %
      
-This step should take no more than 30 seconds and in addition to the above information, you should find some graphs in `pdf/`. If you didn't specify the name of the output file using the `--output_stem` option then the program will use the default which is `test`. 
+This step should take no more than 30 seconds and in addition to the above information, you should find some graphs in `graphs/`. If you didn't specify the name of the output file using the `--output_stem` option then the program will use the default which is `test`.
 
-    $ ls pdf/
-    test-classifications-day.pdf      test-classifications-week.pdf     test-user-distribution-log.pdf    test-users-month.pdf
-    test-classifications-month.pdf    test-user-distribution-linear.pdf test-users-day.pdf                test-users-week.pdf
+    $ ls graphs/
+    test-classifications-day.pdf      test-classifications-week.pdf     test-user-distribution.pdf    test-users-week.pdf
+    test-classifications-month.pdf    test-users-day.pdf                test-users-month.pdf
 
 There are three main graphs produced. The first is simply the number of classifications against time. Three time periods are produced: by day, by week and by month and a cumulative line is added. 
 

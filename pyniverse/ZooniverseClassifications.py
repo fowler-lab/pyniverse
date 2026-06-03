@@ -1,43 +1,41 @@
-#! /usr/bin/env python
-
-import dateutil.parser
-import datetime
 import os
 
-import ujson
-import pandas, numpy
+import dateutil.parser
 import matplotlib
-import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
-
+import matplotlib.pyplot as plt
+import pandas
+import ujson
 from tqdm import tqdm
 
 
-class Classifications(object):
-
+class Classifications:
     """Classifications class for Zooniverse Data Exports CSV file.
 
     Args:
-        zooniverse_file (str): the path to the zooniverse data exports file. Can be a simple foo.csv file or a compressed file
-        as Python can parse most common compression formats (e.g. foo.csv.bz2, foo.csv.gz)
-        pickle_file (str): alternatively, one can provide the path to a pickle (foo.pkl) file that was saved earlier using the save_pickle() method.
-        from_date (str): only consider classifications after this date. Although a string, is parsed so ISO format recommended e.g. 2018-02-20
-        to_date (str): only consider classifications up to this date. Although a string, is parsed so ISO format recommended e.g. 2018-02-26
+        zooniverse_file (str):
+            Path to the Zooniverse data export file. This can be a plain CSV file
+            or a compressed file such as ``foo.csv.bz2`` or ``foo.csv.gz``.
+        pickle_file (str):
+            Alternatively, provide the path to a pickle file saved earlier with
+            ``save_pickle()``.
+        from_date (str):
+            Only consider classifications after this date. ISO format is
+            recommended, for example ``2018-02-20``.
+        to_date (str):
+            Only consider classifications up to this date. ISO format is
+            recommended, for example ``2018-02-26``.
     """
 
-    # def __init__(self,zooniverse_file=None,pickle_file=None,from_date=None,to_date=None,live_rows=True):
     def __init__(self, *args, **kwargs):
-        # check that one of zooniverse_file or pickle_file is specified
-        assert (
-            "zooniverse_file" or "pickle_file" in kwargs.keys()
-        ), "one of zooniverse_file or pickle_file must be specified"
+        if "zooniverse_file" not in kwargs and "pickle_file" not in kwargs:
+            msg = "one of zooniverse_file or pickle_file must be specified"
+            raise ValueError(msg)
 
-        if "zooniverse_file" in kwargs.keys():
-            # read in the raw classifications, parsing the JSON as you go
+        if "zooniverse_file" in kwargs:
             classifications = pandas.read_csv(
                 kwargs["zooniverse_file"],
                 parse_dates=["created_at"],
-                infer_datetime_format=True,
                 converters={
                     "subject_data": self._parse_json,
                     "metadata": self._parse_json,
@@ -46,58 +44,49 @@ class Classifications(object):
                 index_col="classification_id",
             )
 
-            # drop a few of the (unused) columns
-            classifications.drop(["gold_standard", "expert"], axis=1, inplace=True)
+            classifications = classifications.drop(
+                ["gold_standard", "expert"], axis=1, errors="ignore"
+            )
 
-            # create a dataseries of just the date/times
-            if "from_date" in kwargs.keys() and kwargs["from_date"] is not False:
-                a = classifications.loc[
-                    classifications.created_at
-                    > dateutil.parser.parse(kwargs["from_date"]).date()
+            from_date = kwargs.get("from_date")
+            to_date = kwargs.get("to_date")
+
+            if from_date:
+                classifications = classifications.loc[
+                    classifications.created_at > self._parse_bound_date(from_date)
                 ]
-            else:
-                a = classifications
 
-            if "to_date" in kwargs.keys() and kwargs["to_date"] is not False:
-                b = a.loc[
-                    a.created_at < dateutil.parser.parse(kwargs["to_date"]).date()
+            if to_date:
+                classifications = classifications.loc[
+                    classifications.created_at < self._parse_bound_date(to_date)
                 ]
-            else:
-                b = a
 
-            self.classifications = b
+            self.classifications = classifications.copy()
 
-            # then create a Boolean column defining if the classification was made during live or not
             self.classifications["live_project"] = [
                 self._get_live_project(q) for q in self.classifications.metadata
             ]
 
-            # if asked, create a new dataset containing only live classifications
-            if "live_rows" not in kwargs.keys() or kwargs["live_rows"]:
+            if kwargs.get("live_rows", True):
                 self.classifications = self.classifications.loc[
-                    self.classifications["live_project"] == True
+                    self.classifications["live_project"]
                 ]
 
-            # how many classifications have been done?
             self.total_classifications = len(self.classifications)
 
-        elif "pickle_file" in kwargs.keys():
-            # find out the file extension so we can load in the dataset using the right method
-            stem, file_extension = os.path.splitext(kwargs["pickle_file"])
-
-            # doing it this way means you can provide either pickle file and it will still work
-            # self.classifications=pandas.read_pickle(stem+"-classifications"+file_extension)
+        elif "pickle_file" in kwargs:
             self.classifications = pandas.read_pickle(kwargs["pickle_file"])
-
-            # how many classifications have been done?
             self.total_classifications = len(self.classifications)
 
     def create_users_table(self):
         """Create a users table, stored internally as a Pandas dataframe.
 
         Notes
-         * also calculates the Gini coefficient which is a measure of the inequality between the users who have done the most and least classifications.
-         * since it calculates the total_users, this method must be called before any print statements
+            * Also calculates the Gini coefficient, which measures inequality
+              between the users who have done the most and least
+              classifications.
+            * Since it calculates ``total_users``, this method must be called
+              before any print statements.
         """
 
         # create a table of users and how many classifications they have done
@@ -143,9 +132,9 @@ class Classifications(object):
     def __repr__(self):
         """Print a summary of the Zooniverse classifications stored."""
 
-        line = "%30s %7i\n" % ("Total classifications:", self.total_classifications)
-        line += "%30s %7i\n" % ("Total users:", self.total_users)
-        line += "%30s %7.2f\n" % ("Gini coefficient:", self.gini_coefficient)
+        line = f"{'Total classifications:':>30} {self.total_classifications:7d}\n"
+        line += f"{'Total users:':>30} {self.total_users:7d}\n"
+        line += f"{'Gini coefficient:':>30} {self.gini_coefficient:7.2f}\n"
         line += "\n"
 
         # sort the table so the top users are first
@@ -154,29 +143,34 @@ class Classifications(object):
         top_10 = (
             100 * self.users.classifications[:10].sum()
         ) / self.total_classifications
-        line += "%30s %7.1f %%\n" % ("Top   10 users have done:", top_10)
+        line += f"{'Top   10 users have done:':>30} {top_10:7.1f} %\n"
         top_100 = (
             100 * self.users.classifications[:100].sum()
         ) / self.total_classifications
-        line += "%30s %7.1f %%\n" % ("Top  100 users have done:", top_100)
+        line += f"{'Top  100 users have done:':>30} {top_100:7.1f} %\n"
         top_1000 = (
             100 * self.users.classifications[:1000].sum()
         ) / self.total_classifications
-        line += "%30s %7.1f %%\n" % ("Top 1000 users have done:", top_1000)
+        line += f"{'Top 1000 users have done:':>30} {top_1000:7.1f} %\n"
 
-        # sort the table so the top users are last
-        self.users.sort_values(["classifications"], ascending=False, inplace=True)
+        # restore ascending order after reporting headline numbers
+        self.users.sort_values(["classifications"], ascending=True, inplace=True)
 
         return line
 
     def _parse_json(self, data):
         return ujson.loads(data)
 
+    def _parse_bound_date(self, value):
+        timestamp = pandas.Timestamp(dateutil.parser.parse(value))
+        if timestamp.tzinfo is None:
+            return timestamp.tz_localize("UTC")
+        return timestamp
+
     def _get_live_project(self, row):
         try:
             return row["live_project"]
-        except:
-            # apparently some subject metadata doesn't have this? dunno?
+        except (KeyError, TypeError):
             return False
 
     def plot_classifications_by_time(
@@ -206,24 +200,21 @@ class Classifications(object):
         to_date=None,
         add_cumulative=False,
     ):
-        # create a dataseries of just the date/times
         if from_date:
             a = self.classifications.loc[
-                self.classifications.created_at
-                > dateutil.parser.parse(from_date).date()
+                self.classifications.created_at > self._parse_bound_date(from_date)
             ]
 
         else:
             a = self.classifications[["user_name", "created_at"]]
 
         if to_date:
-            b = a.loc[a.created_at < dateutil.parser.parse(to_date).date()]
+            b = a.loc[a.created_at < self._parse_bound_date(to_date)]
         else:
             b = a
 
         foo = b[["user_name", "created_at"]].groupby("user_name").min()
         foo.set_index(foo.created_at, inplace=True)
-        tmp = foo.created_at
 
         self._plot_time_bar(
             foo, sampling, colour, filename, add_cumulative, yaxis="Users"
@@ -244,7 +235,10 @@ class Classifications(object):
         )
         axes1.plot([0, 1], [0, 1], color=colour, linestyle="dashed", linewidth=2)
         axes1.text(
-            0.15, 0.65, "Gini-coefficient = %.2f" % self.gini_coefficient, color=colour
+            0.15,
+            0.65,
+            f"Gini-coefficient = {self.gini_coefficient:.2f}",
+            color=colour,
         )
         axes1.set_xlabel("cumulative contributors")
         axes1.set_ylabel("cumulative classifications")
@@ -259,26 +253,27 @@ class Classifications(object):
         add_cumulative=False,
         yaxis=None,
     ):
-        assert sampling in [
-            "week",
-            "month",
-            "day",
-        ], "sampling must be either week, month or day"
+        if sampling not in {"week", "month", "day"}:
+            msg = "sampling must be either week, month or day"
+            raise ValueError(msg)
 
-        assert filename is not None, "need to specify a filename with a valid extension"
+        if filename is None:
+            msg = "need to specify a filename with a valid extension"
+            raise ValueError(msg)
 
         if sampling == "week":
             resampled_data = data.resample("W").count()
             bar_width = 7.1
         elif sampling == "month":
-            resampled_data = data.resample("M").count()
+            resampled_data = data.resample("ME").count()
             bar_width = 20
         elif sampling == "day":
             resampled_data = data.resample("D").count()
             bar_width = 1.01
 
-        number_of_months = int(
-            (data.index.max() - data.index.min()) / numpy.timedelta64(1, "M")
+        number_of_months = max(
+            self._month_span(data.index.min(), data.index.max()),
+            1,
         )
 
         resampled_data.columns = ["number"]
@@ -328,6 +323,7 @@ class Classifications(object):
             axes2.set_ylim(bottom=0)
 
         fig.savefig(filename, transparent=True)
+        plt.close(fig)
 
     def _task_duration(self, row):
         try:
@@ -335,14 +331,17 @@ class Classifications(object):
             end = dateutil.parser.parse(row.metadata["finished_at"])
             duration = (end - start) / pandas.Timedelta(1, unit="s")
             return duration
-        except:
-            return pandas.Timedelta(0, unit="s")
+        except (KeyError, TypeError, ValueError):
+            return 0.0
 
     def _user_language(self, row):
         try:
             return row.metadata["user_language"]
-        except:
+        except (KeyError, TypeError):
             return ""
+
+    def _month_span(self, start, end):
+        return (end.year - start.year) * 12 + (end.month - start.month)
 
     def _parse_viewport_width(self, row):
         return row.metadata["viewport"]["width"]

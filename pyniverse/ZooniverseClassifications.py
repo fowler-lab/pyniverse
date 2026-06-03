@@ -332,7 +332,7 @@ class Classifications:
             duration = (end - start) / pandas.Timedelta(1, unit="s")
             return duration
         except (KeyError, TypeError, ValueError):
-            return pandas.Timedelta(0, unit="s")
+            return 0.0
 
     def _user_language(self, row):
         try:

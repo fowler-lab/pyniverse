@@ -153,8 +153,8 @@ class Classifications:
         ) / self.total_classifications
         line += f"{'Top 1000 users have done:':>30} {top_1000:7.1f} %\n"
 
-        # restore descending order after reporting headline numbers
-        self.users.sort_values(["classifications"], ascending=False, inplace=True)
+        # restore ascending order after reporting headline numbers
+        self.users.sort_values(["classifications"], ascending=True, inplace=True)
 
         return line
 
